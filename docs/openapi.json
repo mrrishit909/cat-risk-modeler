@@ -1,0 +1,1153 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "cat-risk-modeler",
+  "version": "1.0.0"
+ },
+ "paths": {
+  "/v1/jobs/{job_id}": {
+   "get": {
+    "tags": [
+     "platform"
+    ],
+    "summary": "Status, attempts and result of a long-running job",
+    "operationId": "job_status_v1_jobs__job_id__get",
+    "parameters": [
+     {
+      "name": "job_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Job Id"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/jobs": {
+   "get": {
+    "tags": [
+     "platform"
+    ],
+    "summary": "Jobs by status; status=dead is the dead-letter view",
+    "operationId": "job_list_v1_jobs_get",
+    "parameters": [
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "dead",
+       "title": "Status"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/audit": {
+   "get": {
+    "tags": [
+     "platform"
+    ],
+    "summary": "Latest audit events and whether the hash chain verifies",
+    "operationId": "audit_log_v1_audit_get",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "default": 50,
+       "title": "Limit"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/portfolios/import": {
+   "post": {
+    "tags": [
+     "exposure"
+    ],
+    "summary": "Import a property book. `generate` loads the synthetic coastal book in a background job; `rows` adds locations to an existing book, each row checked and geocoded on its own",
+    "operationId": "import_portfolio_v1_portfolios_import_post",
+    "parameters": [
+     {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Idempotency-Key"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ImportIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/portfolios/{portfolio_id}": {
+   "get": {
+    "tags": [
+     "exposure"
+    ],
+    "summary": "(+) The book: insured value by town, construction and geocode precision, and the policy terms",
+    "operationId": "get_portfolio_v1_portfolios__portfolio_id__get",
+    "parameters": [
+     {
+      "name": "portfolio_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Portfolio Id"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/models/calibrate": {
+   "post": {
+    "tags": [
+     "models"
+    ],
+    "summary": "(+) Fit the hurricane climate to forty years of best tracks and the wind damage curve to fifteen years of claims; store both as versioned models",
+    "operationId": "calibrate_v1_models_calibrate_post",
+    "parameters": [
+     {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Idempotency-Key"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CalibrateIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/scenarios/run": {
+   "post": {
+    "tags": [
+     "scenarios"
+    ],
+    "summary": "Run the stochastic catalogue through the book in a background job: events from the calibrated climate, damage from the calibrated curves with secondary uncertainty, policy terms, the treaty",
+    "operationId": "run_scenario_v1_scenarios_run_post",
+    "parameters": [
+     {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Idempotency-Key"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RunIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/scenarios/{run_id}/losses": {
+   "get": {
+    "tags": [
+     "scenarios"
+    ],
+    "summary": "Where the losses come from: the largest events, average annual loss by category, town, construction and geocode precision",
+    "operationId": "losses_v1_scenarios__run_id__losses_get",
+    "parameters": [
+     {
+      "name": "run_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Run Id"
+      }
+     },
+     {
+      "name": "top",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "default": 10,
+       "title": "Top"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/portfolios/{portfolio_id}/ep-curve": {
+   "get": {
+    "tags": [
+     "analytics"
+    ],
+    "summary": "Exceedance-probability curves (occurrence and aggregate, gross and net of the treaty), PML with its sampling interval, TVaR, AAL; from the approved run unless run_id is given",
+    "operationId": "ep_curve_v1_portfolios__portfolio_id__ep_curve_get",
+    "parameters": [
+     {
+      "name": "portfolio_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Portfolio Id"
+      }
+     },
+     {
+      "name": "run_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "uuid"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Run Id"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/scenarios/{run_id}/approve": {
+   "post": {
+    "tags": [
+     "scenarios"
+    ],
+    "summary": "(+) Sign off a stochastic run as the published view of risk; a second person must approve, never the one who ran it",
+    "operationId": "approve_v1_scenarios__run_id__approve_post",
+    "parameters": [
+     {
+      "name": "run_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid",
+       "title": "Run Id"
+      }
+     },
+     {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Idempotency-Key"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ApproveIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/stress-tests": {
+   "post": {
+    "tags": [
+     "scenarios"
+    ],
+    "summary": "A deterministic storm through the book: mean loss and its spread from damage uncertainty, net of the treaty, where it falls on the occurrence curve, the losses on a map, and how much it matters exactly where it lands",
+    "operationId": "stress_test_v1_stress_tests_post",
+    "parameters": [
+     {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Idempotency-Key"
+      }
+     },
+     {
+      "name": "authorization",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Authorization"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/StressIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "ApproveIn": {
+    "properties": {
+     "note": {
+      "type": "string",
+      "maxLength": 500,
+      "minLength": 3,
+      "title": "Note"
+     }
+    },
+    "type": "object",
+    "required": [
+     "note"
+    ],
+    "title": "ApproveIn"
+   },
+   "CalibrateIn": {
+    "properties": {
+     "portfolio_id": {
+      "type": "string",
+      "format": "uuid",
+      "title": "Portfolio Id"
+     }
+    },
+    "type": "object",
+    "required": [
+     "portfolio_id"
+    ],
+    "title": "CalibrateIn"
+   },
+   "Generate": {
+    "properties": {
+     "seed": {
+      "type": "integer",
+      "maximum": 1000000.0,
+      "minimum": 0.0,
+      "title": "Seed",
+      "default": 11
+     },
+     "locations": {
+      "type": "integer",
+      "maximum": 10000.0,
+      "minimum": 100.0,
+      "title": "Locations",
+      "default": 10000
+     }
+    },
+    "type": "object",
+    "title": "Generate"
+   },
+   "HTTPValidationError": {
+    "properties": {
+     "detail": {
+      "items": {
+       "$ref": "#/components/schemas/ValidationError"
+      },
+      "type": "array",
+      "title": "Detail"
+     }
+    },
+    "type": "object",
+    "title": "HTTPValidationError"
+   },
+   "ImportIn": {
+    "properties": {
+     "external_ref": {
+      "type": "string",
+      "maxLength": 60,
+      "minLength": 1,
+      "title": "External Ref"
+     },
+     "name": {
+      "type": "string",
+      "maxLength": 120,
+      "title": "Name",
+      "default": "Coastal homeowners and small commercial"
+     },
+     "generate": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Generate"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "rows": {
+      "anyOf": [
+       {
+        "items": {
+         "$ref": "#/components/schemas/Row"
+        },
+        "type": "array",
+        "maxItems": 5000
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Rows"
+     }
+    },
+    "type": "object",
+    "required": [
+     "external_ref"
+    ],
+    "title": "ImportIn"
+   },
+   "Row": {
+    "properties": {
+     "ref": {
+      "type": "string",
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "Ref"
+     },
+     "x_km": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "X Km"
+     },
+     "y_km": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Y Km"
+     },
+     "postal_zone": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 20
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Postal Zone",
+      "description": "when there is no rooftop geocode, e.g. PZ-39-0"
+     },
+     "town": {
+      "type": "string",
+      "maxLength": 40,
+      "title": "Town",
+      "default": "Port Ellis"
+     },
+     "elevation_m": {
+      "type": "number",
+      "maximum": 500.0,
+      "minimum": -5.0,
+      "title": "Elevation M",
+      "default": 2.0
+     },
+     "construction": {
+      "type": "string",
+      "title": "Construction"
+     },
+     "year_built": {
+      "type": "integer",
+      "maximum": 2100.0,
+      "minimum": 1800.0,
+      "title": "Year Built"
+     },
+     "roof": {
+      "type": "string",
+      "pattern": "^(hip|gable)$",
+      "title": "Roof",
+      "default": "gable"
+     },
+     "stories": {
+      "type": "integer",
+      "maximum": 60.0,
+      "minimum": 1.0,
+      "title": "Stories",
+      "default": 1
+     },
+     "occupancy": {
+      "type": "string",
+      "pattern": "^(residential|commercial)$",
+      "title": "Occupancy",
+      "default": "residential"
+     },
+     "building_value": {
+      "type": "number",
+      "title": "Building Value"
+     },
+     "contents_value": {
+      "type": "number",
+      "minimum": 0.0,
+      "title": "Contents Value",
+      "default": 0
+     },
+     "time_element_value": {
+      "type": "number",
+      "minimum": 0.0,
+      "title": "Time Element Value",
+      "default": 0
+     },
+     "deductible_pct": {
+      "type": "number",
+      "maximum": 0.5,
+      "minimum": 0.0,
+      "title": "Deductible Pct",
+      "default": 0.02
+     },
+     "deductible_usd": {
+      "type": "number",
+      "minimum": 0.0,
+      "title": "Deductible Usd",
+      "default": 0
+     },
+     "surge_covered": {
+      "type": "boolean",
+      "title": "Surge Covered",
+      "default": false
+     }
+    },
+    "type": "object",
+    "required": [
+     "ref",
+     "construction",
+     "year_built",
+     "building_value"
+    ],
+    "title": "Row"
+   },
+   "RunIn": {
+    "properties": {
+     "portfolio_id": {
+      "type": "string",
+      "format": "uuid",
+      "title": "Portfolio Id"
+     },
+     "events": {
+      "type": "integer",
+      "maximum": 200000.0,
+      "minimum": 1000.0,
+      "title": "Events",
+      "default": 50000
+     },
+     "seed": {
+      "type": "integer",
+      "maximum": 1000000.0,
+      "minimum": 0.0,
+      "title": "Seed",
+      "default": 2026
+     }
+    },
+    "type": "object",
+    "required": [
+     "portfolio_id"
+    ],
+    "title": "RunIn"
+   },
+   "StressIn": {
+    "properties": {
+     "portfolio_id": {
+      "type": "string",
+      "format": "uuid",
+      "title": "Portfolio Id"
+     },
+     "name": {
+      "type": "string",
+      "maxLength": 80,
+      "title": "Name",
+      "default": "Category 4 landfall"
+     },
+     "town": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Town",
+      "description": "aim the landfall at a town's centre, or give landfall_x_km",
+      "default": "Port Ellis"
+     },
+     "landfall_x_km": {
+      "anyOf": [
+       {
+        "type": "number",
+        "maximum": 600.0,
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Landfall X Km"
+     },
+     "pressure_deficit_hpa": {
+      "type": "number",
+      "maximum": 120.0,
+      "minimum": 8.0,
+      "title": "Pressure Deficit Hpa",
+      "default": 90
+     },
+     "rmax_km": {
+      "type": "number",
+      "maximum": 90.0,
+      "minimum": 8.0,
+      "title": "Rmax Km",
+      "default": 22
+     },
+     "forward_speed_ms": {
+      "type": "number",
+      "maximum": 15.0,
+      "minimum": 1.5,
+      "title": "Forward Speed Ms",
+      "default": 5
+     },
+     "heading_deg": {
+      "type": "number",
+      "maximum": 70.0,
+      "minimum": -70.0,
+      "title": "Heading Deg",
+      "default": 0
+     },
+     "shifts_km": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array",
+      "maxItems": 15,
+      "title": "Shifts Km",
+      "default": [
+       -40,
+       -20,
+       -10,
+       0,
+       10,
+       20,
+       40
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "portfolio_id"
+    ],
+    "title": "StressIn"
+   },
+   "ValidationError": {
+    "properties": {
+     "loc": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "integer"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Location"
+     },
+     "msg": {
+      "type": "string",
+      "title": "Message"
+     },
+     "type": {
+      "type": "string",
+      "title": "Error Type"
+     },
+     "input": {
+      "title": "Input"
+     },
+     "ctx": {
+      "type": "object",
+      "title": "Context"
+     }
+    },
+    "type": "object",
+    "required": [
+     "loc",
+     "msg",
+     "type"
+    ],
+    "title": "ValidationError"
+   }
+  }
+ }
+}

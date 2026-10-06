@@ -1,0 +1,195 @@
+{
+ "service": "cat-risk-modeler",
+ "run": "demo-1",
+ "tokens": {
+  "cro": "coastal-chief_risk_officer-demo",
+  "analyst": "coastal-analyst-demo",
+  "viewer": "coastal-viewer-demo"
+ },
+ "steps": [
+  {
+   "title": "A coastal property book",
+   "say": "An invented insurer's book on 600 km of coast: 10,000 homes and small businesses in eight towns, wood frame, masonry, reinforced concrete and manufactured homes, with building, contents and time-element values. Homeowners' policies carry a 2% or 5% hurricane deductible and exclude storm surge; some commercial policies buy surge cover. One in six locations has only a postal code, which the geocoder places at the zone's centroid. A second file of five locations is checked row by row: rows with an unknown construction, a deductible as large as the building, or coordinates out at sea are refused.",
+   "calls": [
+    {
+     "key": "gen",
+     "as": "cro",
+     "method": "POST",
+     "path": "/v1/portfolios/import",
+     "body": {
+      "external_ref": "GM-COASTAL-2026",
+      "generate": {
+       "seed": 11,
+       "locations": 10000
+      }
+     }
+    },
+    {
+     "key": "rows",
+     "as": "analyst",
+     "method": "POST",
+     "path": "/v1/portfolios/import",
+     "body": {
+      "external_ref": "GM-COASTAL-2026",
+      "rows": [
+       {
+        "ref": "N-001",
+        "x_km": 396.2,
+        "y_km": 0.8,
+        "construction": "masonry",
+        "year_built": 2011,
+        "roof": "hip",
+        "occupancy": "commercial",
+        "building_value": 4200000,
+        "contents_value": 2500000,
+        "time_element_value": 900000,
+        "deductible_pct": 0,
+        "deductible_usd": 100000,
+        "surge_covered": true,
+        "elevation_m": 2.1
+       },
+       {
+        "ref": "N-002",
+        "postal_zone": "PZ-39-0",
+        "construction": "wood_frame",
+        "year_built": 1987,
+        "building_value": 310000,
+        "contents_value": 155000,
+        "time_element_value": 31000,
+        "deductible_pct": 0.02
+       },
+       {
+        "ref": "N-003",
+        "x_km": 401.0,
+        "y_km": 1.5,
+        "construction": "timber_log",
+        "year_built": 1990,
+        "building_value": 280000
+       },
+       {
+        "ref": "N-004",
+        "x_km": 402.0,
+        "y_km": 2.0,
+        "construction": "wood_frame",
+        "year_built": 1999,
+        "building_value": 250000,
+        "deductible_pct": 0.05,
+        "deductible_usd": 240000
+       },
+       {
+        "ref": "N-005",
+        "x_km": 405.0,
+        "y_km": -3.0,
+        "construction": "masonry",
+        "year_built": 2005,
+        "building_value": 900000
+       }
+      ]
+     }
+    },
+    {
+     "key": "book",
+     "as": "viewer",
+     "method": "GET",
+     "path": "/v1/portfolios/{{gen.result.portfolio_id}}"
+    }
+   ]
+  },
+  {
+   "title": "Forty years of storms, fifteen of claims",
+   "say": "The hazard model is fitted to the forty years of landfalls in the best-track record: how often, how intense, how large, how fast, where. The damage curve is fitted to fifteen years of claims. A policy in a storm's footprint that never claimed is evidence too: its damage stayed under the deductible. Ignoring those, as a fit to the claims file alone does, gets the curve badly wrong. The simulation truth the history came from is shown alongside; neither fit sees it.",
+   "calls": [
+    {
+     "key": "cal",
+     "as": "analyst",
+     "method": "POST",
+     "path": "/v1/models/calibrate",
+     "body": {
+      "portfolio_id": "{{gen.result.portfolio_id}}"
+     }
+    }
+   ]
+  },
+  {
+   "title": "50,000 hurricanes",
+   "say": "The calibrated climate generates 50,000 landfalls, about 140,000 years of them. Each storm's peak gust and surge reach every location near its track; the damage curve gives a mean damage ratio, a draw from its scatter gives the realised one; deductibles, limits and surge exclusions turn damage into insured loss; the treaty takes its layer per occurrence. Out come the average annual loss, the occurrence and aggregate exceedance curves, the probable maximum losses with their sampling interval, and where the losses come from. Alongside: the burn cost from the forty observed storms, and the truth.",
+   "calls": [
+    {
+     "key": "cat",
+     "as": "analyst",
+     "method": "POST",
+     "path": "/v1/scenarios/run",
+     "body": {
+      "portfolio_id": "{{gen.result.portfolio_id}}",
+      "events": 50000,
+      "seed": 2026
+     }
+    },
+    {
+     "key": "ep",
+     "as": "viewer",
+     "method": "GET",
+     "path": "/v1/portfolios/{{gen.result.portfolio_id}}/ep-curve?run_id={{cat.result.run_id}}"
+    },
+    {
+     "key": "losses",
+     "as": "viewer",
+     "method": "GET",
+     "path": "/v1/scenarios/{{cat.result.run_id}}/losses?top=8"
+    }
+   ]
+  },
+  {
+   "title": "A Category 4 at Port Ellis",
+   "say": "A deterministic stress test: a Category 4 with a 22 km radius of maximum wind making landfall at the centre of the town with the most insured value, heading north at 5 m/s. The loss with the spread from damage uncertainty, the treaty's recovery, the surge that homeowners are not insured for, where the loss sits on the occurrence curve, and the same storm landing up to 40 km either side.",
+   "calls": [
+    {
+     "key": "stress",
+     "as": "analyst",
+     "method": "POST",
+     "path": "/v1/stress-tests",
+     "body": {
+      "portfolio_id": "{{gen.result.portfolio_id}}",
+      "name": "Category 4 landfall at Port Ellis",
+      "town": "Port Ellis",
+      "pressure_deficit_hpa": 90,
+      "rmax_km": 22,
+      "forward_speed_ms": 5,
+      "heading_deg": 0
+     }
+    }
+   ]
+  },
+  {
+   "title": "Sign-off and the audit trail",
+   "say": "The analyst who ran the catalogue cannot approve it. The chief risk officer can, and the run becomes the published view of risk, with the models it used marked approved. Every step is in a hash-chained audit log.",
+   "calls": [
+    {
+     "key": "self",
+     "expect_error": true,
+     "as": "analyst",
+     "method": "POST",
+     "path": "/v1/scenarios/{{cat.result.run_id}}/approve",
+     "body": {
+      "note": "approving my own run"
+     }
+    },
+    {
+     "key": "approve",
+     "as": "cro",
+     "method": "POST",
+     "path": "/v1/scenarios/{{cat.result.run_id}}/approve",
+     "body": {
+      "note": "Reviewed: catalogue converged, hazard uncertainty noted for the board pack"
+     }
+    },
+    {
+     "key": "audit",
+     "as": "cro",
+     "method": "GET",
+     "path": "/v1/audit?limit=12"
+    }
+   ]
+  }
+ ]
+}
